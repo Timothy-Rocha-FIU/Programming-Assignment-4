@@ -125,6 +125,14 @@ int find_first_fit(MemoryManager *manager, int size)
        - Find the first free block with size >= requested size
        - Return its index or -1 if none is found
     */
+   for (i = 0; i < manager->block_count; i++)
+   {
+       if (manager->blocks[i].is_free && manager->blocks[i].size >= size)
+       {
+           return i; // Found a suitable block
+       }
+   }
+   return -1; // No suitable block found
 }
 
 /**
@@ -148,6 +156,21 @@ int find_best_fit(MemoryManager *manager, int size)
        - Find the free block with size >= requested size that has the smallest size difference
        - Return its index or -1 if none is found
     */
+    int best_fit_index = -1;
+    int min_size_diff = INT_MAX; // Initialize to maximum possible value
+    for (int i = 0; i < manager->block_count; i++)
+    {
+        if (manager->blocks[i].is_free && manager->blocks[i].size >= size)
+        {
+            int size_diff = manager->blocks[i].size - size;
+            if (size_diff < min_size_diff)
+            {
+                min_size_diff = size_diff;
+                best_fit_index = i; // Update best fit index
+            }
+        }
+    }
+    return best_fit_index; // Return the index of the best fit block
 }
 
 /**

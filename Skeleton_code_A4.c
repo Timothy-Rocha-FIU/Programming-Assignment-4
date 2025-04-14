@@ -194,6 +194,22 @@ int find_worst_fit(MemoryManager *manager, int size)
        - Find the free block with size >= requested size that has the largest size difference
        - Return its index or -1 if none is found
     */
+    int worst_index = -1;
+    int max_diff = -1;
+    for (int i = 0; i < manager->block_count; i++)
+    {
+        if (manager->blocks[i].is_free && manager->blocks[i].size >= size)
+        {
+            int size_diff = manager->blocks[i].size - size;
+            if (size_diff > max_diff)
+            {
+                max_diff = size_diff;
+                worst_index = i;
+            }
+        }
+    }
+
+    return worst_index;
 }
 
 /**
@@ -219,6 +235,34 @@ bool coalesce_memory(MemoryManager *manager, Process processes[])
        - Continue until no more merges are possible
        - Remember to update process block indices
     */
+    bool merged = false;
+    for (int i = 0; i < manager->block_count - 1; i++)
+    {
+        if (manager->blocks[i].is_free && manager->blocks[i + 1].is_free)
+        {
+            // Merge blocks
+            manager->blocks[i].size += manager->blocks[i + 1].size;
+            // Shift blocks down
+            for (int j = i + 1; j < manager->block_count - 1; j++)
+            {
+                manager->blocks[j] = manager->blocks[j + 1];
+            }
+            manager->block_count--;
+            merged = true;
+
+            // Update process block indices
+            for (int k = 0; k < MAX_PROCESSES; k++)
+            {
+                if (processes[k].block_index > i + 1)
+                {
+                    processes[k].block_index--;
+                }
+            }
+            i--; // Check the current index again after merging
+        }
+    }
+
+    return merged;
 }
 
 /*######################################################################################################################*/

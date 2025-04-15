@@ -1,4 +1,4 @@
-# Makefile for Assignment 4 - COP4610
+# makefile for assignment 4 - COP4610
 
 CC = gcc
 CFLAGS = -Wall -static
